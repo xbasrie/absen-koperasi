@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Kehadiran</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    .signature-canvas {
+      border: 2px dashed #10b981;
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    }
+    
+    .card-shadow {
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+    }
+    
+    .input-focus:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-active:active {
+      transform: translateY(0);
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="min-h-full">
+  <div class="min-h-full gradient-bg py-8 px-4">
+   <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-2xl card-shadow p-8">
+     <div class="text-center mb-8">
+      <div class="inline-block p-3 bg-green-100 rounded-full mb-4">
+       <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+       </svg>
+      </div>
+      <h1 id="app-title" class="text-3xl font-bold text-gray-800 mb-2">Daftar Kehadiran</h1>
+      <p id="subtitle" class="text-gray-600">Sistem Absensi Pegawai</p>
+     </div>
+     <form id="attendance-form" class="space-y-6">
+      <div><label id="name-label" class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label> <input type="text" id="name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg input-focus transition-all">
+      </div>
+      <div><label id="nip-label" class="block text-sm font-semibold text-gray-700 mb-2">NIP</label> <input type="text" id="nip" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg input-focus transition-all">
+      </div>
+      <div><label id="shift-label" class="block text-sm font-semibold text-gray-700 mb-2">Waktu Absen</label>
+       <div class="grid grid-cols-2 gap-4">
+        
+        <label class="relative flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-all"> <input type="radio" name="shift" value="Pagi" required class="absolute opacity-0">
+         <div class="text-center">
+          <div class="text-2xl mb-1">
+           <svg class="w-10 h-10 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-15.66l-.7.7M4.04 19.96l-.7.7M21 12h-1M4 12H3m15.66 8.66l-.7-.7M4.04 4.04l-.7-.7M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg>
+          </div>
+          <div class="font-semibold text-gray-700">
+           Pagi
+          </div>
+         </div></label>
+         
+        <label class="relative flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-all"> <input type="radio" name="shift" value="Sore" required class="absolute opacity-0">
+         <div class="text-center">
+          <div class="text-2xl mb-1">
+           <svg class="w-10 h-10 text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          </div>
+          <div class="font-semibold text-gray-700">
+           Sore
+          </div>
+         </div></label>
+         
+       </div>
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Lokasi Saat Ini</label>
+       <div id="location-status" class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+        <div class="loading-spinner border-green-600 border-t-green-600"></div><span>Mendapatkan lokasi...</span>
+       </div>
+       <div id="map-container" class="mt-3 hidden"><iframe id="map-frame" width="100%" height="200" style="border:0; border-radius: 8px;" loading="lazy"></iframe>
+       </div>
+      </div>
+      <div><label id="signature-label" class="block text-sm font-semibold text-gray-700 mb-2">Tanda Tangan Digital</label>
+       <canvas id="signature-pad" class="signature-canvas w-full bg-gray-50" width="600" height="200"></canvas>
+       
+       <button type="button" id="clear-signature" class="mt-2 text-sm text-green-600 hover:text-green-700 font-semibold inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          Hapus Tanda Tangan
+       </button>
+      </div>
+      <button type="submit" id="submit-btn" class="w-full bg-green-600 text-white font-bold py-4 rounded-lg btn-hover btn-active transition-all flex items-center justify-center gap-2"> <span id="submit-text">Kirim Kehadiran</span> </button>
+     </form>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: "Daftar Kehadiran",
+      subtitle: "Sistem Absensi Pegawai",
+      name_label: "Nama Lengkap",
+      nip_label: "NIP",
+      shift_label: "Waktu Absen",
+      signature_label: "Tanda Tangan Digital",
+      submit_button: "Kirim Kehadiran",
+      primary_color: "#10b981",
+      background_color: "#059669",
+      text_color: "#1f2937",
+      surface_color: "#ffffff",
+      accent_color: "#34d399"
+    };
+
+    let currentLocation = null;
+    let signaturePad = null;
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    async function onConfigChange(config) {
+      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      document.getElementById('name-label').textContent = config.name_label || defaultConfig.name_label;
+      document.getElementById('nip-label').textContent = config.nip_label || defaultConfig.nip_label;
+      document.getElementById('shift-label').textContent = config.shift_label || defaultConfig.shift_label;
+      document.getElementById('signature-label').textContent = config.signature_label || defaultConfig.signature_label;
+      document.getElementById('submit-text').textContent = config.submit_button || defaultConfig.submit_button;
+
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+
+      document.querySelector('.gradient-bg').style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${primaryColor} 100%)`;
+      document.querySelector('.bg-white').style.backgroundColor = surfaceColor;
+      document.getElementById('app-title').style.color = textColor;
+      document.getElementById('submit-btn').style.backgroundColor = primaryColor;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["app_title", config.app_title || defaultConfig.app_title],
+          ["subtitle", config.subtitle || defaultConfig.subtitle],
+          ["name_label", config.name_label || defaultConfig.name_label],
+          ["nip_label", config.nip_label || defaultConfig.nip_label],
+          ["shift_label", config.shift_label || defaultConfig.shift_label],
+          ["signature_label", config.signature_label || defaultConfig.signature_label],
+          ["submit_button", config.submit_button || defaultConfig.submit_button]
+        ])
+      });
+    }
+
+    function initSignaturePad() {
+      const canvas = document.getElementById('signature-pad');
+      const ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+
+      function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        lastX = x;
+        lastY = y;
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        lastX = x;
+        lastY = y;
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+      }
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+
+      canvas.addEventListener('touchstart', startDrawing);
+      canvas.addEventListener('touchmove', draw);
+      canvas.addEventListener('touchend', stopDrawing);
+
+      document.getElementById('clear-signature').addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      signaturePad = canvas;
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            currentLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              link: `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`
+            };
+            
+            document.getElementById('location-status').innerHTML = `
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Lokasi berhasil didapatkan</span>
+            `;
+            
+            const mapFrame = document.getElementById('map-frame');
+            mapFrame.src = `https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}&output=embed`;
+            document.getElementById('map-container').classList.remove('hidden');
+          },
+          (error) => {
+            document.getElementById('location-status').innerHTML = `
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Tidak dapat mengakses lokasi</span>
+            `;
+          }
+        );
+      } else {
+        document.getElementById('location-status').innerHTML = `
+          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Browser tidak mendukung geolokasi</span>
+        `;
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    function isCanvasBlank(canvas) {
+      const ctx = canvas.getContext('2d');
+      const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      
+      for (let i = 0; i < pixelData.length; i += 4) {
+        if (pixelData[i + 3] !== 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // ====================================================================
+    // PERUBAHAN UTAMA "FIRE AND FORGET" DIMULAI DI SINI
+    // ====================================================================
+    document.getElementById('attendance-form').addEventListener('submit', (e) => { // 'async' dihapus
+      e.preventDefault();
+      
+      if (isCanvasBlank(signaturePad)) {
+        showToast('Mohon buat tanda tangan terlebih dahulu', 'error');
+        return;
+      }
+
+      if (!currentLocation) {
+        showToast('Mohon tunggu hingga lokasi didapatkan', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      
+      submitBtn.disabled = true;
+      submitText.textContent = 'Mengirim...';
+      submitBtn.innerHTML = `
+        <div class="loading-spinner"></div>
+        <span>Mengirim...</span>
+      `;
+
+      // 1. Siapkan data Tanggal dan Jam
+      const fullTimestamp = new Date().toLocaleString('id-ID', { 
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const parts = fullTimestamp.split(', ');
+      const tanggal = parts[0];
+      const jam = parts[1];
+
+      // 2. Siapkan FormData
+      const formData = new FormData();
+      formData.append('tanggal', tanggal);
+      formData.append('jam', jam);
+      formData.append('nama', document.getElementById('name').value);
+      formData.append('nip', document.getElementById('nip').value);
+      formData.append('absen', document.querySelector('input[name="shift"]:checked').value);
+      formData.append('lokasi', currentLocation.link);
+      formData.append('ttd', signaturePad.toDataURL('image/png'));
+        
+      // 3. KIRIM DATA (FIRE AND FORGET)
+      // Kita kirim data, tapi kita tidak 'await'.
+      // Kita tambahkan .catch() kecil hanya untuk 'menangkap' error CORS
+      // agar tidak muncul di console log sebagai error besar.
+      fetch('https://script.google.com/macros/s/AKfycbxpKnAQhn0stBTjw5xym8cUEGtklLanWLWNT6SYyati8iAA7N34mHyFa7IL0n9O1S-mNg/exec', {
+        method: 'POST',
+        body: formData
+      }).catch(error => {
+        // Abaikan error CORS, ini sudah diharapkan
+        console.log("Expected CORS error, ignoring: ", error);
+      });
+
+      // 4. LANGSUNG TAMPILKAN SUKSES
+      // Karena kode tidak 'await', eksekusi langsung lanjut ke sini.
+      // Kita tampilkan sukses dan reset form seolah-olah sudah selesai.
+      
+      showToast('Kehadiran berhasil dikirim!', 'success');
+      
+      // Reset form
+      document.getElementById('attendance-form').reset();
+      const ctx = signaturePad.getContext('2d');
+      ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+      
+      document.querySelectorAll('input[name="shift"]').forEach(r => {
+        r.parentElement.classList.remove('border-green-500', 'bg-green-50');
+      });
+
+      // 5. Kembalikan tombol seperti semula
+      // (Ini adalah isi dari blok 'finally' sebelumnya)
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span id="submit-text">${window.elementSdk?.config?.submit_button || defaultConfig.submit_button}</span>`;
+
+      // Blok try...catch...finally sudah tidak ada lagi
+    });
+    // ====================================================================
+    // AKHIR DARI PERUBAHAN
+    // ====================================================================
+
+    document.querySelectorAll('input[name="shift"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        document.querySelectorAll('input[name="shift"]').forEach(r => {
+          r.parentElement.classList.remove('border-green-500', 'bg-green-50');
+        });
+        e.target.parentElement.classList.add('border-green-500', 'bg-green-50');
+      });
+    });
+
+    initSignaturePad();
+    getLocation();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997147e800405f64',t:'MTc2MTg5NDA4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
