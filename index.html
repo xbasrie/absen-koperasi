@@ -88,13 +88,23 @@
   <div class="min-h-full gradient-bg py-8 px-4">
    <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-2xl card-shadow p-8">
+     
      <div class="text-center mb-8">
-      <div class="inline-block p-3 bg-green-100 rounded-full mb-4">
-       <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-       </svg>
+      
+      <div class="mb-4">
+        <img src="https://dekopin.coop/wp-content/uploads/2023/06/Logo-Koperasi-Warna-PNG-www.dekopin.coop_.png" alt="Logo Koperasi" class="w-24 h-auto mx-auto">
       </div>
+      
+      <div class="mb-4">
+        <p class="text-lg font-semibold text-gray-800 uppercase">Koperasi Pegawai Republik Indonesia (KPRI)</p>
+        <p class="text-2xl font-bold text-green-700 uppercase">"Al Ikhlas"</p>
+        <p class="text-md text-gray-700 uppercase">Kantor Kementerian Agama Kota Surabaya</p>
+      </div>
+      
+      <hr class="my-6">
+      
       <h1 id="app-title" class="text-3xl font-bold text-gray-800 mb-2">Daftar Kehadiran</h1>
-      <p id="subtitle" class="text-gray-600">Sistem Absensi Pegawai Koperasi Al Ikhlas</p>
+      <p id="subtitle" class="text-gray-600 hidden">Sistem Absensi Pegawai Koperasi Al Ikhlas</p>
      </div>
      <form id="attendance-form" class="space-y-6">
       <div><label id="name-label" class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label> <input type="text" id="name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg input-focus transition-all">
@@ -170,7 +180,11 @@
 
     async function onConfigChange(config) {
       document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
-      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      // Cek apakah elemen subtitle ada sebelum mengubahnya
+      const subtitleEl = document.getElementById('subtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = config.subtitle || defaultConfig.subtitle;
+      }
       document.getElementById('name-label').textContent = config.name_label || defaultConfig.name_label;
       document.getElementById('nip-label').textContent = config.nip_label || defaultConfig.nip_label;
       document.getElementById('shift-label').textContent = config.shift_label || defaultConfig.shift_label;
@@ -443,7 +457,7 @@
       // 5. Kembalikan tombol seperti semula
       // (Ini adalah isi dari blok 'finally' sebelumnya)
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span id="submit-text">${window.elementSdk?.config?.submit_button || defaultConfig.submit_button}</span>`;
+      submitBtn.innerHTML = `<span id="submit-text">${(window.elementSdk && window.elementSdk.config && window.elementSdk.config.submit_button) ? window.elementSdk.config.submit_button : defaultConfig.submit_button}</span>`;
 
       // Blok try...catch...finally sudah tidak ada lagi
     });
