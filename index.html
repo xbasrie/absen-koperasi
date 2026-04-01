@@ -15,12 +15,6 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .signature-canvas {
-      border: 2px dashed #10b981;
-      border-radius: 8px;
-      cursor: crosshair;
-      touch-action: none;
-    }
 
     .gradient-bg {
       background: linear-gradient(135deg, #059669 0%, #10b981 100%);
@@ -178,21 +172,7 @@
                 style="border:0; border-radius: 8px;" loading="lazy"></iframe>
             </div>
           </div>
-          <div><label id="signature-label" class="block text-sm font-semibold text-gray-700 mb-2">Tanda Tangan
-              Digital</label>
-            <canvas id="signature-pad" class="signature-canvas w-full bg-gray-50" width="600" height="200"></canvas>
 
-            <button type="button" id="clear-signature"
-              class="mt-2 text-sm text-green-600 hover:text-green-700 font-semibold inline-flex items-center gap-1.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                </path>
-              </svg>
-              Hapus Tanda Tangan
-            </button>
-          </div>
           <button type="submit" id="submit-btn"
             class="w-full bg-green-600 text-white font-bold py-4 rounded-lg btn-hover btn-active transition-all flex items-center justify-center gap-2">
             <span id="submit-text">Kirim Kehadiran</span> </button>
@@ -217,10 +197,6 @@
     };
 
     let currentLocation = null;
-    let signaturePad = null;
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
 
     async function onConfigChange(config) {
       document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
@@ -304,58 +280,6 @@
       });
     }
 
-    function initSignaturePad() {
-      const canvas = document.getElementById('signature-pad');
-      const ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-
-      function startDrawing(e) {
-        isDrawing = true;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        lastX = x;
-        lastY = y;
-      }
-
-      function draw(e) {
-        if (!isDrawing) return;
-        e.preventDefault();
-
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-
-        lastX = x;
-        lastY = y;
-      }
-
-      function stopDrawing() {
-        isDrawing = false;
-      }
-
-      canvas.addEventListener('mousedown', startDrawing);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('mouseup', stopDrawing);
-      canvas.addEventListener('mouseout', stopDrawing);
-
-      canvas.addEventListener('touchstart', startDrawing);
-      canvas.addEventListener('touchmove', draw);
-      canvas.addEventListener('touchend', stopDrawing);
-
-      document.getElementById('clear-signature').addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      });
-
-      signaturePad = canvas;
-    }
 
     function getLocation() {
       if (navigator.geolocation) {
@@ -409,25 +333,10 @@
       }, 3000);
     }
 
-    function isCanvasBlank(canvas) {
-      const ctx = canvas.getContext('2d');
-      const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-      for (let i = 0; i < pixelData.length; i += 4) {
-        if (pixelData[i + 3] !== 0) {
-          return false;
-        }
-      }
-      return true;
-    }
 
     document.getElementById('attendance-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      if (isCanvasBlank(signaturePad)) {
-        showToast('Mohon buat tanda tangan terlebih dahulu', 'error');
-        return;
-      }
 
       if (!currentLocation) {
         showToast('Mohon tunggu hingga lokasi didapatkan', 'error');
@@ -468,7 +377,6 @@
         formData.append('nip', document.getElementById('nip').value);
         formData.append('absen', document.querySelector('input[name="shift"]:checked').value);
         formData.append('lokasi', currentLocation.link);
-        formData.append('ttd', signaturePad.toDataURL('image/png'));
 
         // 3. KIRIM DATA DAN TUNGGU RESPONS
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxpKnAQhn0stBTjw5xym8cUEGtklLanWLWNT6SYyati8iAA7N34mHyFa7IL0n9O1S-mNg/exec';
@@ -486,8 +394,6 @@
 
           // Reset form
           document.getElementById('attendance-form').reset();
-          const ctx = signaturePad.getContext('2d');
-          ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
 
           document.querySelectorAll('input[name="shift"]').forEach(r => {
             r.parentElement.classList.remove('border-green-500', 'bg-green-50');
@@ -516,7 +422,6 @@
       });
     });
 
-    initSignaturePad();
     getLocation();
   </script>
   <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'997147e800405f64',t:'MTc2MTg5NDA4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
