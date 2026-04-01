@@ -180,6 +180,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Popup -->
+  <div id="result-modal"
+    class="fixed inset-0 z-[1050] hidden items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 card-shadow transform transition-all text-center">
+      <div id="modal-icon" class="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full"></div>
+      <h3 id="modal-title" class="text-2xl font-bold mb-2"></h3>
+      <p id="modal-message" class="text-gray-600 mb-6"></p>
+      <button id="modal-close-btn"
+        class="w-full text-white font-bold py-3 rounded-lg transition-all btn-hover btn-active cursor-pointer">OK</button>
+    </div>
+  </div>
   <script>
     const defaultConfig = {
       app_title: "Daftar Kehadiran",
@@ -322,15 +334,35 @@
       }
     }
 
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
+    function showModal(message, type = 'success') {
+      const modal = document.getElementById('result-modal');
+      const modalIcon = document.getElementById('modal-icon');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const closeBtn = document.getElementById('modal-close-btn');
 
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
+      if (type === 'success') {
+        modalIcon.className = 'mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600';
+        modalIcon.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+        modalTitle.textContent = 'Berhasil!';
+        modalTitle.className = 'text-2xl font-bold mb-2 text-green-700';
+        closeBtn.className = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-all btn-hover btn-active';
+      } else {
+        modalIcon.className = 'mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-red-100 text-red-600';
+        modalIcon.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+        modalTitle.textContent = 'Perhatian!';
+        modalTitle.className = 'text-2xl font-bold mb-2 text-red-700';
+        closeBtn.className = 'w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all btn-hover btn-active';
+      }
+
+      modalMessage.textContent = message;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      closeBtn.onclick = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
     }
 
 
@@ -339,7 +371,7 @@
 
 
       if (!currentLocation) {
-        showToast('Mohon tunggu hingga lokasi didapatkan', 'error');
+        showModal('Mohon tunggu hingga lokasi didapatkan terlebih dahulu.', 'error');
         return;
       }
 
@@ -390,7 +422,7 @@
 
         // 4. CEK HASIL RESPONS
         if (result.status === "success") {
-          showToast('Kehadiran berhasil dikirim!', 'success');
+          showModal('Kehadiran Anda berhasil dicatat di sistem.', 'success');
 
           // Reset form
           document.getElementById('attendance-form').reset();
@@ -400,12 +432,12 @@
           });
         } else {
           // Jika server (Google Script) menolak atau error
-          showToast('Gagal: ' + result.message, 'error');
+          showModal('Gagal: ' + result.message, 'error');
         }
 
       } catch (error) {
         console.error("Fetch error: ", error);
-        showToast('Terjadi kesalahan koneksi atau pengiriman lambat. Coba lagi.', 'error');
+        showModal('Terjadi kesalahan koneksi atau pengiriman lambat. Coba lagi.', 'error');
       } finally {
         // 5. Kembalikan tombol seperti semula
         submitBtn.disabled = false;
